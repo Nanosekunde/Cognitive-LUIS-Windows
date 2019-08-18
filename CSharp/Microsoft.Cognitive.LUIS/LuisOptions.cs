@@ -1,17 +1,15 @@
-﻿//
+﻿// 
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license.
-//
-// Microsoft Cognitive Services (formerly Project Oxford): https://www.microsoft.com/cognitive-services
-
-//
-// Microsoft Cognitive Services (formerly Project Oxford) GitHub:
-// https://github.com/Microsoft/ProjectOxford-ClientSDK
-
-//
+// 
+// Microsoft Bot Framework: http://botframework.com
+// 
+// Bot Builder SDK GitHub:
+// https://github.com/Microsoft/BotBuilder
+// 
 // Copyright (c) Microsoft Corporation
 // All rights reserved.
-//
+// 
 // MIT License:
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -20,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -33,57 +31,56 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Cognitive.LUIS
 {
     /// <summary>
-    /// Represents an intent identified by the LUIS service. 
+    /// Interface containing optional parameters for a LUIS request.
     /// </summary>
-    public class Intent
+    public interface ILuisOptions
     {
         /// <summary>
-        /// Name of the intent.
+        /// Indicates if logging of queries to LUIS is allowed.
         /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// Confidence score of the intent match.
-        /// </summary>
-        public double Score { get; set; }
+        bool? Log { get; set; }
 
         /// <summary>
-        /// Array of actions containing the actions 
+        /// Turn on spell checking.
         /// </summary>
-        public Action[] Actions { get; set; }
+        bool? SpellCheck { get; set; }
 
         /// <summary>
-        /// Load the intent values from JSON returned from the LUIS service.
+        /// Use the staging endpoint.
         /// </summary>
-        /// <param name="intent">JSON containing the intent values.</param>
-        public void Load(JObject intent)
+        bool? Staging { get; set; }
+
+        /// <summary>
+        /// The time zone offset.
+        /// </summary>
+        double? TimezoneOffset { get; set; }
+
+        /// <summary>
+        /// The verbose flag.
+        /// </summary>
+        bool? Verbose { get; set; }
+
+        /// <summary>
+        /// The Bing Spell Check subscription key.
+        /// </summary>
+        string BingSpellCheckSubscriptionKey { get; set; }
+    }
+
+    public static partial class Extensions
+    {
+        public static void Apply(this ILuisOptions source, ILuisOptions target)
         {
-            Name = (string)intent["intent"];
-            Score = (double)intent["score"];
-            var actions = (JArray)intent["actions"] ?? new JArray();
-            Actions = ParseActionArray(actions);
-        }
-
-        /// <summary>
-        /// Parses an json array of actions into an action object array
-        /// </summary>
-        /// <param name="array"></param>
-        /// <returns>Array of Action of objects</returns>
-        private Action[] ParseActionArray(JArray array)
-        {
-            var count = array.Count;
-            var a = new Action[count];
-            for (var i = 0; i < count; i++)
-            {
-                var t = new Action();
-                t.Load((JObject)array[i]);
-                a[i] = t;
-            }
-            return a;
+            if (source.Log.HasValue) target.Log = source.Log.Value;
+            if (source.SpellCheck.HasValue) target.SpellCheck = source.SpellCheck.Value;
+            if (source.Staging.HasValue) target.Staging = source.Staging.Value;
+            if (source.TimezoneOffset.HasValue) target.TimezoneOffset = source.TimezoneOffset.Value;
+            if (source.Verbose.HasValue) target.Verbose = source.Verbose.Value;
+            if (!string.IsNullOrWhiteSpace(source.BingSpellCheckSubscriptionKey)) target.BingSpellCheckSubscriptionKey = source.BingSpellCheckSubscriptionKey;
         }
     }
 }
+
